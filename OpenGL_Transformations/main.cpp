@@ -16,8 +16,16 @@
 
 int main()
 {
-	GLFWwindow* window = InitializeOpenGL("Translations");
+	//GLFWwindow* window = InitializeOpenGL("Translations");
+
+	// Translates a vector by "trans" identity value
+	glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+	glm::mat4 trans = glm::mat4(1.0f);
+	trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+	vec = trans * vec;
+	std::cout << vec.x << vec.y << vec.z << std::endl;
 	
+	/*
 	while (!glfwWindowShouldClose(window))
 	{
 		ProcessInput(window);
@@ -35,7 +43,7 @@ int main()
 
 
 	// Clean-up
-	glfwTerminate();
+	glfwTerminate();*/
 
 	return 0;
 }
