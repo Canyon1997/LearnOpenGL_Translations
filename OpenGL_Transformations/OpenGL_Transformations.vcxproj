@@ -141,6 +141,10 @@
     <ClInclude Include="OpenGLOperations.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\WoodenFragmentShader.glsl" />
+    <None Include="Shaders\WoodenVertexShader.glsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
