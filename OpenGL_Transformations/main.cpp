@@ -11,8 +11,7 @@
 // Personal/External Libraries
 #include "OpenGLOperations.h"
 #include "Shader.h"
-
-// TODO: continue on "Texture Units" section of Textures lesson in OpenGL
+#include "stb_image.h"
 
 int main()
 {
@@ -21,32 +20,28 @@ int main()
 	Shader woodenShader("Shaders//WoodenVertexShader.glsl", "Shaders//WoodenFragmentShader.glsl");
 
 	float vertices[]{
-		0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // bottom right
-		0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // top right
+		0.5f, -0.5f, 0.0f,    1.0f, 0.0f, 0.0f, // bottom right
+		0.5f, 0.5f, 0.0f,     0.0f, 1.0f, 0.0f, // top right
 		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f, // bottom left
 		-0.5f, 0.5f, 0.0f,    1.0f, 1.0f, 0.0f, // top left
 	};
 
-	/*
-	// Translates a vector by "trans" identity value
-	glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
-	glm::mat4 trans = glm::mat4(1.0f);
-	trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
-	vec = trans * vec;
-	std::cout << vec.x << vec.y << vec.z << std::endl;
+	unsigned int indices[]{
+		0, 1, 2,
+		2, 3, 1
+	};
 
-	// Scale and rotate object
-	glm::mat4 trans2 = glm::mat4(1.0f);
-	trans2 = glm::rotate(trans2, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	trans2 = glm::scale(trans2, glm::vec3(0.5, 0.5, 0.5));
-	*/
-
-	unsigned int VBO, VAO;
+	unsigned int VBO, VAO, EBO;
 
 	// VBO
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	// EBO
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// VAO
 	glGenVertexArrays(1, &VAO);
@@ -67,7 +62,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, indices);
 		
 		//Swap color buffer and shows output to screen
 		glfwSwapBuffers(window);
