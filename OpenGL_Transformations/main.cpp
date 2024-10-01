@@ -31,7 +31,7 @@ int main()
 		2, 3, 1
 	};
 
-	unsigned int VBO, VAO, EBO, TBO;
+	unsigned int VBO, VAO, EBO, TBO1, TBO2;
 
 	// Vertex Buffer Object
 	glGenBuffers(1, &VBO);
@@ -43,9 +43,20 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	// Texture Buffer Object
-	glGenBuffers(1, &TBO);
-	glBindBuffer(GL_TEXTURE_2D, TBO);
+	// Vertex Array Object
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	// Texture Buffer Objects
+	glGenTextures(1, &TBO1);
+	glBindTexture(GL_TEXTURE_2D, TBO1);
 	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -66,17 +77,32 @@ int main()
 	}
 	stbi_image_free(woodTextureData);
 
+	glGenTextures(1, &TBO2);
+	glBindTexture(GL_TEXTURE_2D, TBO2);
 
-	// Vertex Array Object
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
+	int width2, height2, NrChannel2;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* faceTextureData = stbi_load("Textures//awesomeface.png", &width2, &height2, &NrChannel2, 0);
+	if (faceTextureData)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width2, height2, 0, GL_RGBA, GL_UNSIGNED_BYTE, faceTextureData);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+		return -1;
+	}
+	stbi_image_free(faceTextureData);
+
+	woodenShader.Use();
+	woodenShader.setInt("firstTexture", 0);
+	woodenShader.setInt("secondTexture", 1);
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -86,8 +112,12 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindTexture(GL_TEXTURE_2D, TBO);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, TBO1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, TBO2);
 		woodenShader.Use();
+
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, indices);
 		
