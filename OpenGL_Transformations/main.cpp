@@ -169,6 +169,7 @@ int main()
 	glDeleteTextures(1, &TBO1);
 	glDeleteTextures(1, &TBO2);
 	glDeleteShader(woodenShader1.ID);
+	glDeleteShader(woodenShader2.ID);
 	glfwTerminate();
 
 	return 0;
