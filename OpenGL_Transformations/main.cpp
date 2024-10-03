@@ -17,7 +17,8 @@ int main()
 {
 	GLFWwindow* window = InitializeOpenGL("Translations");
 
-	Shader woodenShader("Shaders//WoodenVertexShader.glsl", "Shaders//WoodenFragmentShader.glsl");
+	Shader woodenShader1("Shaders//WoodenVertexShader.glsl", "Shaders//WoodenFragmentShader.glsl");
+	Shader woodenShader2("Shaders//WoodenVertexShader.glsl", "Shaders//WoodenFragmentShader.glsl");
 	
 	float vertices[]{
 		0.5f, -0.5f, 0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f, // bottom right
@@ -101,12 +102,17 @@ int main()
 	stbi_image_free(faceTextureData);
 
 	// must use shader to set uniform values
-	woodenShader.Use();
-	woodenShader.setInt("firstTexture", 0);
-	woodenShader.setInt("secondTexture", 1);
+	woodenShader1.Use();
+	woodenShader1.setInt("firstTexture", 0);
+	woodenShader1.setInt("secondTexture", 1);
+
+	woodenShader2.Use();
+	woodenShader2.setInt("firstTexture", 0);
+	woodenShader2.setInt("secondTexture", 1);
 
 	// get mat4 location in vertex shader
-	unsigned int transMatrix = glGetUniformLocation(woodenShader.ID, "transform");
+	unsigned int transMatrix1 = glGetUniformLocation(woodenShader1.ID, "transform");
+	unsigned int transMatrix2 = glGetUniformLocation(woodenShader2.ID, "transform");
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -116,16 +122,34 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glm::mat4 woodTransMatrix = glm::mat4(1.0f);
-		woodTransMatrix = glm::translate(woodTransMatrix, glm::vec3(0.5f, -0.5f, 0.0f));
-		woodTransMatrix = glm::rotate(woodTransMatrix, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		// First object render
+		glm::mat4 woodTransMatrix1 = glm::mat4(1.0f);
+		woodTransMatrix1 = glm::translate(woodTransMatrix1, glm::vec3(0.5f, -0.5f, 0.0f));
+		woodTransMatrix1 = glm::rotate(woodTransMatrix1, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, TBO1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, TBO2);
-		woodenShader.Use();
-		glUniformMatrix4fv(transMatrix, 1, GL_FALSE, glm::value_ptr(woodTransMatrix));
+		woodenShader1.Use();
+		glUniformMatrix4fv(transMatrix1, 1, GL_FALSE, glm::value_ptr(woodTransMatrix1));
+
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, indices);
+
+		// Second object render
+		glm::mat4 woodTransMatrix2 = glm::mat4(1.0f);
+		woodTransMatrix2 = glm::translate(woodTransMatrix2, glm::vec3(-0.5f, 0.5f, 0.0f));
+		woodTransMatrix2 = glm::scale(woodTransMatrix2, glm::vec3(glm::sin((double)glfwGetTime()),
+			glm::sin((double)glfwGetTime()),
+			glm::sin((double)glfwGetTime())));
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, TBO1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, TBO2);
+		woodenShader2.Use();
+		glUniformMatrix4fv(transMatrix2, 1, GL_FALSE, glm::value_ptr(woodTransMatrix2));
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, indices);
@@ -139,6 +163,12 @@ int main()
 
 
 	// Clean-up
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteTextures(1, &TBO1);
+	glDeleteTextures(1, &TBO2);
+	glDeleteShader(woodenShader1.ID);
 	glfwTerminate();
 
 	return 0;
